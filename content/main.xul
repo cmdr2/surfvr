@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE window []>
+
+<window id="s-window"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:svg="http://www.w3.org/2000/svg"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    title="Surf"
+    style="cursor: none"
+    >
+
+    <script type="application/javascript" src="chrome://surf/content/OculusBridge.min.js"></script>
+    <script type="application/javascript" src="chrome://surf/content/stats.min.js"></script>
+    <script type="application/javascript" src="chrome://surf/content/main.js"></script>
+
+    <html:div id="stats" style="position: absolute"></html:div>
+
+    <hbox>
+      <html:canvas id="leftBuffer" width="720" height="800" style="border: 2px solid orange;display:none"></html:canvas>
+      <html:canvas id="rightBuffer" width="720" height="800" style="border: 2px solid blue;display:none"></html:canvas>
+    </hbox>
+
+    <html:canvas id="glCanvas" width="1440" height="800" style="border: 2px solid green;"></html:canvas>
+
+    <hbox>
+      <html:iframe id="backpage" width="720" height="800" src="http://www.surfvr.com/examples/css3-playground.html" style="visibility:hidden"></html:iframe>
+    </hbox>
+
+    <!-- modified version of shaders originally sourced from: http://www.mtbs3d.com/phpbb/viewtopic.php?f=140&t=17081#p120456 -->
+    <script id="vshader" type="x-shader/x-vertex">
+        attribute vec2 a_position;
+        attribute vec2 a_texCoord;
+
+        uniform vec2 u_resolution;
+
+        varying vec2 v_texCoord;
+        void main() {
+            // convert the rectangle from pixels to 0.0 to 1.0
+            vec2 zeroToOne = a_position / u_resolution;
+
+            // convert from 0->1 to 0->2
+            vec2 zeroToTwo = zeroToOne * 2.0;
+
+            // convert from 0->2 to -1->+1 (clipspace)
+            vec2 clipSpace = zeroToTwo - 1.0;
+
+            gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+
+            // pass the texCoord to the fragment shader
+            // The GPU will interpolate this value between points.
+            v_texCoord = a_texCoord;
+        }
+    </script>
+    <script id="fshader" type="x-shader/x-fragment">
+        precision mediump float;
+
+        uniform sampler2D left_eye_texture;
+        uniform sampler2D right_eye_texture;
+
+        varying vec2 v_texCoord;
+
+        // left
+        float as = 1.0;
+        float w = 1.0;
+        float h = 1.0;
+        float scaleFactor = 1.0;
+
+        vec2 leftLensCenter  = vec2((w + 0.25 * 0.5)*0.5, h*0.5);
+        vec2 Scale           = vec2((w/2.0) * scaleFactor, (h/2.0) * scaleFactor * as);
+        vec2 ScaleIn         = vec2((1.6), (1.6) / as);
+        vec4 HmdWarpParam    = vec4(1, 0.22, 0.24, 0);
+
+        // right
+        vec2 rightLensCenter = vec2((w + -0.25 * 0.5)*0.5, h*0.5);
+
+        vec2 screenCenter    = vec2(0.5, 0.5);
+
+        vec2 HmdWarp(vec2 in01, vec2 lensCenter) {
+            vec2 theta = (in01 - lensCenter) * ScaleIn; // Scales to [-1, 1]
+            float rSq = theta.x * theta.x + theta.y * theta.y;
+            vec2 rvector = theta * (HmdWarpParam.x + HmdWarpParam.y * rSq +
+                           HmdWarpParam.z * rSq * rSq +
+                           HmdWarpParam.w * rSq * rSq * rSq);
+            return lensCenter + Scale * rvector;
+        }
+
+        void main(void) {
+            vec2 texcoord = v_texCoord;
+            if (texcoord.x > 0.5) {
+                texcoord.x -= 0.5;
+            }
+            texcoord.x *= 2.0; 
+
+            if (v_texCoord.x > 0.5) {
+                vec2 texcoord = HmdWarp(texcoord, rightLensCenter);
+                if (any(bvec2(clamp(texcoord,screenCenter-vec2(0.5,0.5), screenCenter+vec2(0.5,0.5)) - texcoord))) {
+                    gl_FragColor = vec4(vec3(0.0), 1.0);
+                    return;
+                }
+                vec3 Reye;
+                 
+                Reye = texture2D(right_eye_texture, texcoord.xy).rgb;
+                    
+                gl_FragColor.rgb = Reye;
+                gl_FragColor.a = 1.0;
+            } else {
+                vec2 texcoord = HmdWarp(texcoord, leftLensCenter);
+                if (any(bvec2(clamp(texcoord,screenCenter-vec2(0.5,0.5), screenCenter+vec2(0.5,0.5)) - texcoord))) {
+                    gl_FragColor = vec4(vec3(0.0), 1.0);
+                    return;
+                }
+                vec3 Leye;
+                Leye = texture2D(left_eye_texture, texcoord.xy).rgb;
+                    
+                gl_FragColor.rgb = Leye;
+                gl_FragColor.a = 1.0;
+            }
+        }
+    </script>
+
+</window>
