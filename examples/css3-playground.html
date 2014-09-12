@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Surf CSS3 Playground, by cmdr2</title>
+<title>Surf CSS3 Playground, by @cmdr2</title>
 
 <script>
 	  var tag = document.createElement('script');
@@ -17,8 +17,8 @@
           playerVars: { 'autoplay': 1, 'controls': 1,'autohide':1,'wmode':'opaque' },
           // videoId: 'MrbiSUgZEbg',
           videoId: 'vXr-2hwTk58',
-          width: '853',
-          height: '480'
+          width: '1000',
+          height: '600'
         });
       }
 </script>
@@ -33,31 +33,24 @@ body {
 }
 #viewport {
 	perspective: 700px;
-	width: 100%;
+	width: 78%;
 	height: 100%;
 	position: absolute;
 	overflow: hidden;
-	border: 1px solid green;
-}
-#camera {
-	left: 50%;
-	top: 50%;
 }
 #world {
 	transform-style: preserve-3d;
-	animation: slideDown 10sec infinite;
 }
 #tv {
-	width: 853px;
-	height: 480px;
-	/*background: red;*/
-	transform: translate3d(-421px, -240px, -1100px);
+	width: 1000px;
+	height: 600px;
+	background: red;
+	transform: translate3d(-421px, -240px, -1500px);
 }
 #remote {
-	display: none;
-	width: 40px;
-	height: 70px;
-	transform: translate3d(30px, 10px, -300px) rotateX(60deg);
+	width: 240px;
+	height: 170px;
+	transform: translate3d(130px, 315px, -900px) rotateX(60deg);
 }
 #table {
 	display: none;
@@ -67,17 +60,18 @@ body {
 }
 
 /* random stupid squares */
-#sidePanel {
+#easterMario {
 	width: 80px;
 	height: 150px;
-	background: blue;
-	transform: translate3d(0px, -450px, 1100px) rotateX(45deg);
+	transform: translate3d(0px, 0px, 1100px);
+	-moz-animation: orbit 30s infinite;
 }
 #bottomPanel {
 	width: 88px;
 	height: 150px;
 	background: purple;
 	transform: translate3d(0px, 1100px, 0px) rotateX(90deg);
+	-moz-animation: slidearound 10s infinite;
 }
 #topPanel {
 	width: 90px;
@@ -91,6 +85,7 @@ body {
 }
 #htmlEditor label {
 	color: white;
+	font-size: 30px;
 }
 
 #cssEditor {
@@ -98,10 +93,10 @@ body {
 }
 #cssEditor label {
 	color: white;
+	font-size: 30px;
 }
 
 #mouseCursor {
-	display: none;
 	position: absolute;
 	color: white;
 	width: 10px;
@@ -117,18 +112,33 @@ body {
 	width: 400px;
 	height: 300px;
 }
+
+@-moz-keyframes slidearound {
+	0% {transform: translate3d(0px, 1100px, 1500px) rotateX(90deg)}
+	50% {transform: translate3d(0px, 1100px, -1500px) rotateX(90deg)}
+	100% {transform: translate3d(0px, 1100px, 1500px) rotateX(90deg)}
+}
+
+@-moz-keyframes orbit {
+	0% {transform: translate3d(0px, 0px, 4000px) rotateY(0deg)}
+	25% {transform: translate3d(-4000px, 0px, 0px) rotateY(-90deg)}
+	50% {transform: translate3d(0px, 0px, -4000px) rotateY(-180deg)}
+	75% {transform: translate3d(4000px, 0px, 0px) rotateY(-270deg)}
+	100% {transform: translate3d(0px, 0px, 4000px) rotateY(-360deg)}
+}
 </style>
 
 <script>
-var world, camera, mouseCursor;
+var viewport, world, mouseCursor;
 
 /**
  * eye: -1 is left, +1 is right
  * orientationMatrix: 16-element matrix3d()
  */
 function render(eye, orientationMatrix) {
-	camera.style.transform = 'translate3d(' + (eye * -100) + 'px, 0px, 700px) ' + orientationMatrix;
-	// camera.style.transform = 'translate3d(' + (eye * -30) + 'px, 0px, 700px) rotateY(220deg)';
+	viewport.style.width = '78%';
+	viewport.style.left = (eye > 0 ? '0%' : '22%');
+	world.style.transform = 'translate3d(' + (eye * 10) + 'px, 0px, 0px) ' + orientationMatrix;
 }
 
 /* postMessage stuff for receiving camera rotations and parallax filters */
@@ -142,7 +152,7 @@ function receiveMessage(event) {
 		render(event.data.eye, event.data.orientationMatrix); // -1 is left, +1 is right
 		document.body.offsetHeight; // force DOM repaint
 	} else if (event.data.type === 'mouseEvent') {
-		mouseCursor.style.left = event.data.x + 'px';
+		mouseCursor.style.left = (event.data.x * 0.78) + 'px';
 		mouseCursor.style.top = event.data.y + 'px';
 	} else if (event.data.type === 'keyboardEvent') {
 		
@@ -150,8 +160,8 @@ function receiveMessage(event) {
 }
 
 window.addEventListener('load', function() {
+	viewport = document.getElementById('viewport');
 	world = document.getElementById('world');
-	camera = document.getElementById('camera');
 	mouseCursor = document.getElementById('mouseCursor');
 	render(-1, '');
 });
@@ -161,26 +171,24 @@ window.addEventListener('load', function() {
 
 <body>
 <div id="viewport">
- <div id="camera" class="threedee">
   <div id="world">
    <div id="tv" class="threedee"></div>
    <img id="remote" src='remote-control.gif' class="threedee" />
    <img id="table" src='wooden-table.jpg' class="threedee" />
-   <div id="sidePanel" class="threedee"></div>
+   <img id="easterMario" class="threedee" src="retro_mario.png" />
    <div id="bottomPanel" class="threedee"></div>
    <div id="topPanel" class="threedee"></div>
 
    <div id="htmlEditor" class="threedee">
-   	<label>HTML</label>
+   	<label>HTML</label><br/>
    	<textarea class="editor"></textarea>
    </div>
    <div id="cssEditor" class="threedee">
-   	<label>CSS</label>
+   	<label>CSS</label><br/>
    	<textarea class="editor"></textarea>
    </div>
   </div>
- </div>
+ <div id="mouseCursor">x</div>
 </div>
-<div id="mouseCursor">x</div>
 </body>
 </html>

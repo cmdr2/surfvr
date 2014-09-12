@@ -1,3 +1,7 @@
+/*
+Original author: @cmdr2
+*/
+
 var gl, glCanvas, leftBuffer, rightBuffer, leftBufferCtx, rightBufferCtx,
     backpage, leftTexture, rightTexture, stats, cssQuat = null;
 
@@ -107,13 +111,6 @@ function render(eye) {
             // 2. TODO there's a bug where the 360 rotation gets covered in half time when going clockwise, while it is
             //       fine when going anti-clockwise
             //    EDIT: This goes away when I remove my Y-rotation calibration code
-
-            // 3. TODO there's a bug where I see double beyond 500px from camera
-
-            // 4. TODO there's a bug when objects elongated along the Z axis appear to cross each other (like an X) in
-            //       the rendering of the two eyes. This is a blocker for Mario
-
-            // 5. TODO there's a bug where I see double before 400px from camera. Probably related to #3 and #4
             setTimeout(function() {
                 leftBufferCtx.drawWindow(backpage.contentWindow, 0, 0, 720, 800, "rgb(255, 255, 255)");
 
@@ -136,11 +133,8 @@ function render(eye) {
 
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, 6);
 
-                // requestAnimationFrame(function() {
-                // setTimeout(function() {
-                    stats.end();
-                    render(-eye);
-                // }, 0);
+                stats.end();
+                render(-eye);
             }, 2);
         } else if (eye === EYE_RIGHT) {
             setTimeout(function() {
@@ -165,11 +159,8 @@ function render(eye) {
 
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, 6);
 
-                // requestAnimationFrame(function() {
-                // setTimeout(function() {
-                    stats.end();
-                    render(-eye);
-                // }, 0);
+                stats.end();
+                render(-eye);
             }, 2);
         }
     } catch (e) {

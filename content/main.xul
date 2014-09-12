@@ -2,6 +2,8 @@
 
 <!DOCTYPE window []>
 
+<!-- Original author: @cmdr2 -->
+
 <window id="s-window"
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:svg="http://www.w3.org/2000/svg"
@@ -18,11 +20,11 @@
     <html:div id="stats" style="position: absolute"></html:div>
 
     <hbox>
-      <html:canvas id="leftBuffer" width="720" height="800" style="border: 2px solid orange;display:none"></html:canvas>
-      <html:canvas id="rightBuffer" width="720" height="800" style="border: 2px solid blue;display:none"></html:canvas>
+      <html:canvas id="leftBuffer" width="720" height="800" style="border: 0px solid orange;display:none"></html:canvas>
+      <html:canvas id="rightBuffer" width="720" height="800" style="border: 0px solid blue;display:none"></html:canvas>
     </hbox>
 
-    <html:canvas id="glCanvas" width="1440" height="800" style="border: 2px solid green;"></html:canvas>
+    <html:canvas id="glCanvas" width="1440" height="800" style=""></html:canvas>
 
     <hbox>
       <html:iframe id="backpage" width="720" height="800" src="http://www.surfvr.com/examples/css3-playground.html" style="visibility:hidden"></html:iframe>
